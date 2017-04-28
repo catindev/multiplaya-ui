@@ -1,0 +1,56 @@
+.pt {
+    padding-top: 1.5rem;
+}
+
+.form {
+    composes: pt;
+}
+
+.center {
+    text-align: center;
+}
+
+.label {
+    composes: center;
+    display: block;
+}
+
+.panel {
+    composes: center pt;
+}
+
+.muted {
+    opacity: .88;
+}
+
+.button {
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: #fff;
+    border: solid #222 2px;
+    border-radius: 5px;
+    padding-bottom: 5px;
+    box-shadow: 2px 2px 0 #222;
+}
+
+.button:hover:enabled {
+    box-shadow: none;
+}
+
+.button:active:enabled {
+    box-shadow: none;
+}
+
+.button:disabled {
+    border-color: rgba(0,0,0,.5);
+    box-shadow: none;
+}
+
+.text {
+    display: inline-block;
+    border: solid #222 2px;
+}
+
+.text:focus {
+    border: solid #222 2px;
+}

@@ -1,0 +1,54 @@
+.row {
+    min-height: 69px;
+    height: auto;
+    margin-bottom: 12px;
+    background: rgba( 0, 0, 0, 0.2 );
+    padding: 12px;
+    padding-top: 22px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.logo {
+    margin: 0 auto;
+    width: 184px;
+}
+
+.image {
+    width: 100%;
+    height: auto;
+}
+
+.title {
+    display: block;
+    padding-top: 7px;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 300;
+    text-align:center;
+}
+
+.title:hover {
+    text-decoration: underline;
+    color: #fff;
+}
+
+
+
+@media (min-width: 1024px) {
+    .row {
+        padding: 12px;
+    }
+
+    .logo {
+        float: left;
+        width: 184px;
+        margin-right: 12px;
+        position: relative;
+    }
+
+    .title {
+        text-align: left;
+    }
+
+}

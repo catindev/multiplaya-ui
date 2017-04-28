@@ -1,0 +1,7 @@
+.contentContainer {  padding-top: 1rem; }
+
+@media (min-width: 1024px) {
+  .contentContainer {
+    padding: 2rem 10rem 5rem;
+  }
+}
