@@ -17,6 +17,11 @@ const Card = asyncComponent(
     { name: 'Card' },
 );
 
+const NotFound = asyncComponent(
+    () => System.import('./NotFound').then(module => module.default),
+    { name: 'NotFound' },
+);
+
 const listStyle = { paddingTop: '2rem' };
 
 const gamesList = list =>
@@ -28,18 +33,19 @@ const gamesList = list =>
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { ui: 'request', games: [], lastQuery: false };
+    this.state = { ui: 'request', games: false, lastQuery: false };
   }
 
   fetchGames(query){
     if (!query) return;
     const dudes = query.replace(/\s/g, '');
     if (dudes.indexOf(',') === -1 || this.state.lastQuery === query) return;
-    this.setState({ ui: 'fetching', games: [], lastQuery: query });
+    this.setState({ ui: 'fetching', games: false, lastQuery: query });
     const response = ({ data }) => this.setState({
-      ui: 'request', games: data
+      ui: data.length ? 'request' : 'not found',
+      games: data
     });
-    axios.get(`${APIURL}/?dudes=${query}`).then( response );
+    axios.get(`${APIURL}/?dudes=${dudes}`).then( response );
   }
 
   render() {
@@ -48,7 +54,8 @@ class App extends Component {
           <div>
             <Form uiState={this.state.ui} onClick={this.fetchGames.bind(this)}/>
             { this.state.ui === 'fetching' && <Loader /> }
-            { this.state.games.length > 0 && gamesList(this.state.games) }
+            { this.state.games && gamesList(this.state.games) }
+            { this.state.ui === 'not found' && <NotFound /> }
           </div>
         </ContentContainer>
     );

@@ -6,7 +6,9 @@ const Card = ({ state }) =>
       <div className={styles.logo}>
         <img src={state.logo}/>
       </div>
-      <a className={styles.title} href={state.storeLink}>{state.name}</a>
+      <a className={styles.title} href={state.storeLink} target="_blank">
+        {state.name}
+      </a>
     </div>
 ;
 

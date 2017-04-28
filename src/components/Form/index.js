@@ -7,8 +7,8 @@ const buttonClasses = classNames('btn', styles.button);
 const textClasses = classNames('form-control', styles.text);
 
 const getLabelText = state => state === 'fetching'
-  ? <span>🤔&nbsp;&nbsp;&nbsp;Give a sec...</span>
-  : <span>🎮&nbsp;&nbsp;&nbsp;Search games</span>;
+  ? <span>🤔&nbsp;&nbsp;Give a sec...</span>
+  : <span>🎮&nbsp;&nbsp;Search games</span>;
 
 class Form extends Component {
   constructor(props) {
@@ -30,7 +30,7 @@ class Form extends Component {
       <form className={styles.form} onSubmit={this.click.bind(this)}>
         <div className="form-group">
           <label htmlFor="nicknames" className={styles.label}>
-            👾&nbsp;&nbsp;&nbsp;Whos playing?
+            👾&nbsp;&nbsp;Whos playing?
           </label>
 
           <input type="text" className={textClasses} id="nicknames"

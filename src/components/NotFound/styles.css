@@ -1,0 +1,8 @@
+.component {
+    height: auto;
+    padding: .5rem;
+    overflow: hidden;
+    font-size: 22px;
+    text-align: center;
+    font-weight: 600;
+}

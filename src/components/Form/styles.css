@@ -54,3 +54,11 @@
 .text:focus {
     border: solid #222 2px;
 }
+
+@media (min-width: 1024px) {
+    .text {
+        display: block;
+        width: 500px;
+        margin: 0 auto;
+    }
+}
