@@ -7,57 +7,102 @@ import asyncComponent from './asyncComponent';
 
 const APIURL = 'https://multiplaya-api.glitch.me/v1';
 
+const socket = io.connect("https://multiplaya-api.glitch.me/");
+socket.on('welcome', ({ id }) => console.log('Connected to server as', id));
+
 const Loader = asyncComponent(
   () => System.import('./Loader').then(module => module.default),
   { name: 'Loader' },
 );
 
 const Card = asyncComponent(
-    () => System.import('./GameCard').then(module => module.default),
-    { name: 'Card' },
+  () => System.import('./GameCard').then(module => module.default),
+  { name: 'Card' },
+);
+
+const ProfileError = asyncComponent(
+  () => System.import('./ProfileError').then(module => module.default),
+  { name: 'ProfileError' },
 );
 
 const NotFound = asyncComponent(
-    () => System.import('./NotFound').then(module => module.default),
-    { name: 'NotFound' },
+  () => System.import('./NotFound').then(module => module.default),
+  { name: 'NotFound' },
 );
 
 const listStyle = { paddingTop: '2rem' };
 
 const gamesList = list =>
-    <div style={listStyle}>
-      { list.map( game => <Card key={game.appID} state={game} />) }
-    </div>
-;
+  <div style={listStyle}>
+    {list.map(game => <Card key={game.appID} state={game} />)}
+  </div>
+  ;
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { ui: 'request', games: false, lastQuery: false };
+    this.state = {
+      ui: 'request', games: false, error: false, queue: 0
+    };
   }
 
-  fetchGames(query){
-    if (!query) return;
-    const dudes = query.replace(/\s/g, '');
-    if (dudes.indexOf(',') === -1 || this.state.lastQuery === query) return;
-    this.setState({ ui: 'fetching', games: false, lastQuery: query });
-    const response = ({ data }) => this.setState({
-      ui: data.length ? 'request' : 'not found',
-      games: data
+  componentDidMount() {
+    socket.on('profileError', ({ profile, error }) => {
+      this.setState({ ui: 'profileError', error: { profile, message: error } });
     });
-    axios.get(`${APIURL}/?dudes=${dudes}`).then( response );
+
+    socket.on('queueData', gameData => {
+      let queue = this.state.queue;
+      queue--;
+      const ui = queue === 0 ? 'finish' : 'fetch';
+      this.setState({ ui, queue });
+
+      if (gameData !== false) {
+        let games = this.state.games !== false
+          ? this.state.games.concat(gameData) : [gameData];
+        this.setState({ games });
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    });
+
+
+    socket.on('response', ({ items }) => {
+      console.log('items', items)
+      let games = this.state.games !== false
+        ? this.state.games.concat(items) : items;
+      this.setState({ games });
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    socket.on('finish', ({ queue }) => {
+      if (queue > 0) this.setState({ ui: 'fetch', queue })
+      else this.setState({ ui: 'finish', queue });
+      console.log('finish with', queue, 'tasks');
+    });
+  }
+
+  fetchGames(query) {
+    const dudes = query
+      .split(/,|\s+|\r|\n|\r\n/)
+      .filter(p => p !== '');
+    this.setState({ ui: 'fetch', games: false });
+    socket.emit('fetch', { dudes });
   }
 
   render() {
     return (
-        <ContentContainer>
-          <div>
-            <Form uiState={this.state.ui} onClick={this.fetchGames.bind(this)}/>
-            { this.state.ui === 'fetching' && <Loader /> }
-            { this.state.games && gamesList(this.state.games) }
-            { this.state.ui === 'not found' && <NotFound /> }
-          </div>
-        </ContentContainer>
+      <ContentContainer>
+        <div>
+          <Form uiState={this.state.ui} onClick={this.fetchGames.bind(this)} />
+          {this.state.games && gamesList(this.state.games)}
+
+          {this.state.ui === 'profileError' &&
+            <ProfileError error={this.state.error.message}
+              profile={this.state.error.profile} />}
+
+          {this.state.ui === 'fetch' && <Loader />}
+        </div>
+      </ContentContainer>
     );
   }
 }

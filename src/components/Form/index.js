@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import TextareaAutosize from 'react-autosize-textarea';
 import classNames from 'classnames';
 import styles from './styles.css';
 
@@ -6,8 +7,8 @@ const helpTextClasses = classNames('form-text', styles.center, styles.muted);
 const buttonClasses = classNames('btn', styles.button);
 const textClasses = classNames('form-control', styles.text);
 
-const getLabelText = state => state === 'fetching'
-  ? <span>🤔&nbsp;&nbsp;Give a sec...</span>
+const getLabelText = state => state === 'fetch'
+  ? <span>🤔&nbsp;&nbsp;Searching...</span>
   : <span>🎮&nbsp;&nbsp;Search games</span>;
 
 class Form extends Component {
@@ -32,22 +33,20 @@ class Form extends Component {
           <label htmlFor="nicknames" className={styles.label}>
             👾&nbsp;&nbsp;Whos playing?
           </label>
+          <TextareaAutosize rows={1} className={textClasses}
+            placeholder="Ex. JakeTheDog, finn_human, bmo"
+            value={this.state.dudes}
+            onChange={this.change.bind(this)} />
 
-          <input type="text" className={textClasses} id="nicknames"
-                 disabled={this.props.uiState === 'fetching'}
-                 value={this.state.dudes}
-                 onChange={this.change.bind(this)}
-                 placeholder="Ex. JakeTheDog, finn_human, bmo"/>
-
-          <small className={ helpTextClasses }>
+          <small className={helpTextClasses}>
             Comma separate steam nicknames
           </small>
 
           <div className={styles.panel}>
-            <button type="button" className={ buttonClasses }
-                    disabled={this.props.uiState === 'fetching'}
-                    onClick={ this.click.bind(this) }>
-              { getLabelText(this.props.uiState) }
+            <button type="button" className={buttonClasses}
+              disabled={this.props.uiState === 'fetch'}
+              onClick={this.click.bind(this)}>
+              {getLabelText(this.props.uiState)}
             </button>
           </div>
         </div>
