@@ -7,7 +7,7 @@ import asyncComponent from './asyncComponent';
 
 const APIURL = 'https://multiplaya-api.glitch.me/';
 
-const socket = io.connect("http://localhost:9999/");
+const socket = io.connect(APIURL);
 
 const Card = asyncComponent(
   () => System.import('./GameCard').then(module => module.default),
@@ -61,16 +61,8 @@ class App extends Component {
     });
 
     socket.on('ooops', (error) => {
-      if (error.profile) return this.setState({
-        ui: 'profileError',
-        progress: 100,
-        error: { profile, message: error }
-      });
-      this.setState({
-        ui: 'error', error: error.message
-      });
+      this.setState({ error, progress: 100 });
       console.log(error.message || error);
-      alert(error.message || error)
     });
 
     socket.on('queue', ({ game }) => {
