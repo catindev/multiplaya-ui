@@ -7,7 +7,12 @@ import asyncComponent from './asyncComponent';
 
 const APIURL = 'https://multiplaya-api.glitch.me/';
 
-const socket = io.connect('http://localhost:9999');
+const socket = io.connect(APIURL);
+
+const Loader = asyncComponent(
+  () => System.import('./Loader').then(module => module.default),
+  { name: 'Loader' },
+);
 
 const Card = asyncComponent(
   () => System.import('./GameCard').then(module => module.default),
@@ -49,11 +54,11 @@ class App extends Component {
     }, 1000);
 
     socket.on('connect', () => {
-      this.setState({ connection: true });
+      this.setState({ connection: true, progress: 100 });
     });
 
     socket.on('disconnect', () => {
-      this.setState({ connection: false });
+      this.setState({ connection: false, progress: 0 });
     });
 
     socket.on('welcome', ({ id }) => {
@@ -91,7 +96,6 @@ class App extends Component {
   }
 
   fetchGames(query) {
-    queueCounter = 0;
     this.setState({ error: false, games: false });
     const profiles = query
       .split(/,|\s+|\r|\n|\r\n/)
@@ -110,6 +114,7 @@ class App extends Component {
         <div>
           <Progress percent={this.state.progress} color="#FCF3AF" height="6" />
           <Form uiState={this.state.ui} onClick={this.fetchGames.bind(this)} />
+          {this.state.progress < 100 && <Loader />}
           {this.state.error && <Error>{this.state.error}</Error>}
           {this.state.games && gamesList(this.state.games)}
         </div>
