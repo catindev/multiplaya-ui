@@ -7,7 +7,7 @@ import asyncComponent from './asyncComponent';
 
 const APIURL = 'https://multiplaya-api.glitch.me/';
 
-const socket = io.connect(APIURL);
+const socket = io.connect('http://localhost:9999');
 
 const Card = asyncComponent(
   () => System.import('./GameCard').then(module => module.default),
