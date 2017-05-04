@@ -11,6 +11,18 @@ const getLabelText = state => state === 'fetch'
   ? <span>🤔&nbsp;&nbsp;Searching...</span>
   : <span>🎮&nbsp;&nbsp;Search games</span>;
 
+function FormButton({ state }) {
+  if (state === 'fetch') {
+    return (
+      <button type="button" className={buttonClasses}
+        onClick={this.click.bind(this)}>
+        🎮&nbsp;&nbsp;Search games
+      </button>
+    );
+  }
+  return <GuestGreeting />;
+}
+
 class Form extends Component {
   constructor(props) {
     super(props);
@@ -39,15 +51,14 @@ class Form extends Component {
             onChange={this.change.bind(this)} />
 
           <small className={helpTextClasses}>
-            Comma separate steam nicknames
+            List of public Steam profiles: nicknames, IDs or links
           </small>
 
           <div className={styles.panel}>
             <button type="button" className={buttonClasses}
-              disabled={this.props.uiState === 'fetch'}
               onClick={this.click.bind(this)}>
-              {getLabelText(this.props.uiState)}
-            </button>
+              🎮&nbsp;&nbsp;Search games
+              </button>
           </div>
         </div>
       </form>

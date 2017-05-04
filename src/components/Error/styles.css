@@ -1,0 +1,19 @@
+.wrapper {
+    padding-top: 15px;   
+}
+
+.component {
+    padding: 13px;
+    background: rgba(252,243,175, .58);
+    color: #000;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+@media (min-width: 1024px) {
+    .component {
+        width: 500px;
+        margin: 0 auto;
+    }
+}

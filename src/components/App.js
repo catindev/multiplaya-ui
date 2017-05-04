@@ -1,19 +1,13 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import Progress from 'react-progress';
 
 import ContentContainer from './ContentContainer';
 import Form from './Form';
 import asyncComponent from './asyncComponent';
 
-const APIURL = 'https://multiplaya-api.glitch.me/v1';
+const APIURL = 'https://multiplaya-api.glitch.me/';
 
-const socket = io.connect("https://multiplaya-api.glitch.me/");
-socket.on('welcome', ({ id }) => console.log('Connected to server as', id));
-
-const Loader = asyncComponent(
-  () => System.import('./Loader').then(module => module.default),
-  { name: 'Loader' },
-);
+const socket = io.connect("http://localhost:9999/");
 
 const Card = asyncComponent(
   () => System.import('./GameCard').then(module => module.default),
@@ -25,9 +19,9 @@ const ProfileError = asyncComponent(
   { name: 'ProfileError' },
 );
 
-const NotFound = asyncComponent(
-  () => System.import('./NotFound').then(module => module.default),
-  { name: 'NotFound' },
+const Error = asyncComponent(
+  () => System.import('./Error').then(module => module.default),
+  { name: 'Error' },
 );
 
 const listStyle = { paddingTop: '2rem' };
@@ -38,69 +32,94 @@ const gamesList = list =>
   </div>
   ;
 
+let queueCounter = 0;
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      ui: 'request', games: false, error: false, queue: 0
+      ui: 'request', games: false, error: false,
+      queue: 0, progress: 0, connection: '...'
     };
   }
 
   componentDidMount() {
-    socket.on('profileError', ({ profile, error }) => {
-      this.setState({ ui: 'profileError', error: { profile, message: error } });
+    setTimeout(() => {
+      !socket.connected && this.setState({ connection: false });
+    }, 1000);
+
+    socket.on('connect', () => {
+      this.setState({ connection: true });
     });
 
-    socket.on('queueData', gameData => {
-      let queue = this.state.queue;
-      queue--;
-      const ui = queue === 0 ? 'finish' : 'fetch';
-      this.setState({ ui, queue });
+    socket.on('disconnect', () => {
+      this.setState({ connection: false });
+    });
 
-      if (gameData !== false) {
-        let games = this.state.games !== false
-          ? this.state.games.concat(gameData) : [gameData];
-        this.setState({ games });
-        window.scrollTo(0, document.body.scrollHeight);
+    socket.on('welcome', ({ id }) => {
+      console.log('Connected to server as', id);
+    });
+
+    socket.on('ooops', (error) => {
+      if (error.profile) return this.setState({
+        ui: 'profileError',
+        progress: 100,
+        error: { profile, message: error }
+      });
+      this.setState({
+        ui: 'error', error: error.message
+      });
+      console.log(error.message || error);
+      alert(error.message || error)
+    });
+
+    socket.on('queue', ({ game }) => {
+      let queue = this.state.queue; queue += 1;
+      let progress = Math.round(queue / this.state.totalQueue * 100);
+      progress <= 5 && (progress = 5);
+      this.setState({ queue, progress });
+
+      game !== false && this.setState({
+        games: this.state.games !== false
+          ? this.state.games.concat(game)
+          : [game]
+      });
+    });
+
+    socket.on('response', data => {
+      console.info(':D response data', data);
+      if (data) {
+        const { games, queue } = data;
+        this.setState({ games, queue: 0, totalQueue: queue });
+        queue === 0 && this.setState({ ui: 'finish', progress: 100 });
+      } else {
+        this.setState({ ui: 'finish', progress: 100 });
       }
-    });
-
-
-    socket.on('response', ({ items }) => {
-      console.log('items', items)
-      let games = this.state.games !== false
-        ? this.state.games.concat(items) : items;
-      this.setState({ games });
-      window.scrollTo(0, document.body.scrollHeight);
-    });
-
-    socket.on('finish', ({ queue }) => {
-      if (queue > 0) this.setState({ ui: 'fetch', queue })
-      else this.setState({ ui: 'finish', queue });
-      console.log('finish with', queue, 'tasks');
     });
   }
 
   fetchGames(query) {
-    const dudes = query
+    queueCounter = 0;
+    this.setState({ error: false, games: false });
+    const profiles = query
       .split(/,|\s+|\r|\n|\r\n/)
       .filter(p => p !== '');
-    this.setState({ ui: 'fetch', games: false });
-    socket.emit('fetch', { dudes });
+    if (profiles.length > 0) {
+      this.setState({ ui: 'fetch', games: false, progress: 5 });
+      socket.emit('fetch', { profiles });
+    } else {
+      this.setState({ error: 'I can\'t find games without list of Steam profiles. Type them there 👆' });
+    }
   }
 
   render() {
     return (
-      <ContentContainer>
+      <ContentContainer connection={this.state.connection}>
         <div>
+          <Progress percent={this.state.progress} color="#FCF3AF" height="6" />
           <Form uiState={this.state.ui} onClick={this.fetchGames.bind(this)} />
+          {this.state.error && <Error>{this.state.error}</Error>}
           {this.state.games && gamesList(this.state.games)}
-
-          {this.state.ui === 'profileError' &&
-            <ProfileError error={this.state.error.message}
-              profile={this.state.error.profile} />}
-
-          {this.state.ui === 'fetch' && <Loader />}
         </div>
       </ContentContainer>
     );

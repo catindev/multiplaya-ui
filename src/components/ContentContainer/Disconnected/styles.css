@@ -1,0 +1,18 @@
+.component {
+    padding: 20px;
+    background: #FBA058;
+    color: #000;
+    font-size: 14px;
+    text-align: center;
+    border-top: 6px solid #000;
+    border-bottom: 6px solid #000;
+}
+
+.link {
+    color: #000;
+    text-decoration: underline;
+}
+.link:hover {
+        color: #000;
+    text-decoration: underline;
+}

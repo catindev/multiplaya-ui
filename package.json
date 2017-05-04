@@ -15,6 +15,7 @@
     "react": "^15.5.4",
     "react-autosize-textarea": "^0.4.3",
     "react-dom": "^15.5.4",
+    "react-progress": "^0.0.12",
     "rimraf": "^2.6.1"
   },
   "devDependencies": {
